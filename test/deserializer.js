@@ -1009,27 +1009,27 @@ describe('JSON API Deserializer', function () {
   });
 
   describe('links', function () {
-    it('should be included', function (done) {
-      var dataSet = {
-        data: {
-          type: 'users',
-          attributes: { 'first-name': 'Sandro', 'last-name': 'Munda' },
-        },
-        links: {
-          self: '/articles/1/relationships/tags',
-          related: '/articles/1/tags'
-        }
-      };
+    context('for a resource', function () {
+      it('should be included', function (done) {
+        var dataSet = {
+          data: {
+            type: 'users',
+            attributes: { 'first-name': 'Sandro', 'last-name': 'Munda' },
+            links: {
+              self: '/users/1'
+            }
+          }
+        };
 
-      new JSONAPIDeserializer()
-      .deserialize(dataSet, function (err, json) {
-        expect(json).to.have.key('first-name', 'last-name', 'links');
-        expect(json.links).to.be.eql({
-          self: '/articles/1/relationships/tags',
-          related: '/articles/1/tags'
+        new JSONAPIDeserializer()
+        .deserialize(dataSet, function (err, json) {
+          expect(json).to.have.key('first-name', 'last-name', 'links');
+          expect(json.links).to.be.eql({
+            self: '/users/1'
+          });
+
+          done(null, json);
         });
-
-        done(null, json);
       });
     });
   });
