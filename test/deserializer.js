@@ -1009,19 +1009,18 @@ describe('JSON API Deserializer', function () {
   });
 
   describe('links', function () {
-    context('for a resource', function () {
-      it('should be included', function (done) {
-        var dataSet = {
-          data: {
-            type: 'users',
-            attributes: { 'first-name': 'Sandro', 'last-name': 'Munda' },
-            links: {
-              self: '/users/1'
-            }
+    it('for a resource; should be included', function (done) {
+      var dataSet = {
+        data: {
+          type: 'users',
+          attributes: { 'first-name': 'Sandro', 'last-name': 'Munda' },
+          links: {
+            self: '/users/1'
           }
-        };
+        }
+      };
 
-        new JSONAPIDeserializer()
+      new JSONAPIDeserializer()
         .deserialize(dataSet, function (err, json) {
           expect(json).to.have.key('first-name', 'last-name', 'links');
           expect(json.links).to.be.eql({
@@ -1030,7 +1029,56 @@ describe('JSON API Deserializer', function () {
 
           done(null, json);
         });
-      });
+    });
+    
+    it('for a resource with relationship and included data; should be included', function (done) {
+      var dataSet = {
+        "data": [{
+          "type": "articles",
+          "id": "1",
+          "attributes": {
+            "title": "JSON API paints my bikeshed!"
+          },
+          "links": {
+            "self": "http://example.com/articles/1"
+          },
+          "relationships": {
+            "author": {
+              "data": { "type": "people", "id": "9" }
+            }
+          }
+        }],
+        "included": [{
+          "type": "people",
+          "id": "9",
+          "attributes": {
+            "first-name": "Dan",
+            "last-name": "Gebhardt",
+            "twitter": "dgeb"
+          },
+          "links": {
+            "self": "http://example.com/people/9"
+          }
+        }]
+      }
+
+      new JSONAPIDeserializer()
+        .deserialize(dataSet, function (err, json) {
+          expect(json).to.eql([{
+            "title": "JSON API paints my bikeshed!",
+            "id": "1",
+            "author": {
+              "first-name": "Dan",
+              "last-name": "Gebhardt",
+              "twitter": "dgeb",
+              "id": "9",
+              "links": { "self": "http://example.com/people/9" }
+            },
+            "links": { "self": "http://example.com/articles/1" }
+          }])
+
+          done(null, json);
+        });
     });
   });
 });
